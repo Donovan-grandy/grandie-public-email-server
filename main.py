@@ -8,7 +8,10 @@ from flask_cors import CORS,cross_origin
 import os
 import json
 import sqlalchemy
+<<<<<<< HEAD
 import datetime
+=======
+>>>>>>> ffe8b89d6e41080bc7146aab07de8b0e09b245a8
 from db import connect_to_db
 load_dotenv()
 app = Flask(__name__)
