@@ -82,13 +82,16 @@ except Exception as e:
 
 
 try:
-    session = 
+    db_session = sessionmaker(bind=db)
+except Exception as e:
+    print(e)
 
 @app.route('/api/v1/email/initiator-selection', methods=['POST','OPTIONS'])
 def session():
     try:
-        initiator = InitiatorContact(firstname=request.form.get('first_name'),lastname=request.form.get('last_name'),email=request.form.get('email'),initiator_type=request.form.get('type'))
-        initiator.save()
+        initiator = InitiatorContact(firstname=request.form.get('firstname'),lastname=request.form.get('lastname'),email=request.form.get('email'),initiator_type=request.form.get('type'))
+        db_session.add(initiator)
+        db_session.commit()
     except Exception as e:
         print(e)
     sg = SendGridAPIClient()
@@ -112,13 +115,95 @@ def session():
 
     return ''
 
-@app.route('/parents', methods=['POST','OPTIONS'])
-def parents():
+@app.route('/teachers', methods=['POST','OPTIONS'])
+def teachers():
     print(request.form)
+    class_code = request.form.get('class_code')
+    try:
+        teacher = Teacher(
+        firstname=request.form.get('first_name'),
+        lastname=request.form.get('last_name'),
+        email=request.form.get('email'),
+        grade=request.form.get('grade'),
+        county=request.form.get('county'),
+        state=request.form.get('state'),
+        city=request.form.get('city'),
+        zipcode=request.form.get('zip_code'),
+        classcode=''
+        )
+        db_session.add(teacher)
+        db_session.commit()
+    except Exception as e:
+        print(e)
+    message = Mail(
+    from_email='from_email@example.com',
+    to_emails='to@example.com',
+    html_content='<strong>Thank you from Grandy</strong>')
+    message.dynamic_template_data = {
+        'subject': 'Thank you from Grandy',
+        'first_name': request.form.get('first_name'),
+        'school': request.form.get('school'),
+        'class_code':class_code
+    }
+    message.template_id = 'd-cb512bdefbf54e1ba9a71804d7a3dcbd'
+    try:
+        sendgrid_client = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+        response = sendgrid_client.send(message)
+        print(response.status_code)
+        print(response.body)
+        print(response.headers)
+    except Exception as e:
+        print(e)
+        print(request.form)
 
 @app.route('/students', methods=['POST','OPTIONS'])
+# {{first_name}} {{last_name}}
+# Your class code for school:  {{ school }}
+# is {{ class_code }}
 def students():
     print(request.form)
+
+    try:
+        student = Student(
+        firstname=request.form.get('first_name'),
+        lastname=request.form.get('last_name'),
+        email=request.form.get('email'),
+        grade=request.form.get('grade'),
+        county=request.form.get('county'),
+        state=request.form.get('state'),
+        city=request.form.get('city'),
+        zipcode=request.form.get('zip_code'),
+        classcode=request.form.get('class_code')
+        )
+        db_session.add(student)
+        db_session.commit()
+    except Exception as e:
+        print(e)
+
+    print(request.form)
+    message = Mail(
+    from_email='hub@grandy.com',
+    to_emails=request.form.get('email'),
+    html_content='<strong>Thank you from Grandy</strong>')
+    message.dynamic_template_data = {
+        'subject': 'Thank you from Grandy',
+        'first_name': request.form.get('first_name'),
+        'last_name': request.form.get('last_name'),
+        'school':request.form.get('school'),
+        'class_code': request.form.get('class_code')
+    }
+    message.template_id = 'd-e2cb30520f6d4633a271aa5130502cd7'
+    try:
+        sendgrid_client = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+        response = sendgrid_client.send(message)
+        print(response.status_code)
+        print(response.body)
+        print(response.headers)
+    except Exception as e:
+        print(e)
+        print(request.form)
+
+
 if __name__ == "__main__":
-    app.run(host='127.0.0.1', port=8080, debug=True)
+    app.run(host='127.0.0.1', port=8080, debug=True,ssl_context=('cert.pem', 'key.pem'))
 

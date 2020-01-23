@@ -46,7 +46,7 @@ class Student(Base):
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     def __repr__(self):
-        return f"<Parent(name={self.studentfirstname + self.studentlastname}, email={self.email}, classcode={self.classcode})>"
+        return f"<Student(name={self.studentfirstname + self.studentlastname}, email={self.email}, classcode={self.classcode})>"
 
 
 
@@ -63,4 +63,4 @@ class InitiatorContact(Base):
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     def __repr__(self):
-        return f"<Parent(name={self.studentfirstname + self.studentlastname}, email={self.email}, classcode={self.classcode})>"
+        return f"<InitiatorContact(name={self.studentfirstname + self.studentlastname}, email={self.email}, classcode={self.classcode})>"
